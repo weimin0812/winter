@@ -2,6 +2,7 @@ package com.free.winter.beans.factory.support;
 
 import com.free.winter.beans.BeanDefinition;
 import com.free.winter.beans.PropertyValue;
+import com.free.winter.beans.SimpleTypeConverter;
 import com.free.winter.beans.factory.BeanCreationException;
 import com.free.winter.beans.factory.BeanDefinitionRegistry;
 import com.free.winter.beans.factory.config.ConfigurableBeanFactory;
@@ -76,6 +77,8 @@ public class DefaultBeanFactory extends DefaultSingletonBeanRegistry
         }
 
         BeanDefinitionValueResolver beanDefinitionValueResolver = new BeanDefinitionValueResolver(this);
+        SimpleTypeConverter simpleTypeConverter = new SimpleTypeConverter();
+
 
         try{
             for (PropertyValue propertyValue : propertyValueList){
@@ -88,7 +91,8 @@ public class DefaultBeanFactory extends DefaultSingletonBeanRegistry
 
                 for(PropertyDescriptor propertyDescriptor : propertyDescriptors){
                     if (propertyDescriptor.getName().equals(propertyName)){
-                        propertyDescriptor.getWriteMethod().invoke(bean, resolvedValue);
+                        Object convertValue = simpleTypeConverter.convertIfNecessary(resolvedValue, propertyDescriptor.getPropertyType());
+                        propertyDescriptor.getWriteMethod().invoke(bean, convertValue);
                         break;
                     }
                 }

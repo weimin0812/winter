@@ -16,7 +16,7 @@ import org.junit.runners.Suite;
                 ResourceTest.class
         })
 
-public class AllTests {
+public class AllTestsVersion1 {
 
 
 }
