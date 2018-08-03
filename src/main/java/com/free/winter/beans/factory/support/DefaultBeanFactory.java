@@ -7,6 +7,7 @@ import com.free.winter.beans.factory.BeanCreationException;
 import com.free.winter.beans.factory.BeanDefinitionRegistry;
 import com.free.winter.beans.factory.config.ConfigurableBeanFactory;
 import com.free.winter.util.ClassUtils;
+import org.apache.commons.beanutils.BeanUtils;
 
 import java.beans.BeanInfo;
 import java.beans.Introspector;
@@ -66,7 +67,8 @@ public class DefaultBeanFactory extends DefaultSingletonBeanRegistry
     private Object createBean(BeanDefinition beanDefinition) {
         Object bean = instantiateBean(beanDefinition);
 
-        populateBean(beanDefinition, bean);
+        //     populateBean(beanDefinition, bean);
+        populateBeanUseCommonBeanUtils(beanDefinition, bean);
         return bean;
     }
 
@@ -80,8 +82,8 @@ public class DefaultBeanFactory extends DefaultSingletonBeanRegistry
         SimpleTypeConverter simpleTypeConverter = new SimpleTypeConverter();
 
 
-        try{
-            for (PropertyValue propertyValue : propertyValueList){
+        try {
+            for (PropertyValue propertyValue : propertyValueList) {
                 String propertyName = propertyValue.getName();
                 Object originalValue = propertyValue.getValue();
                 Object resolvedValue = beanDefinitionValueResolver.resolveValueIfNecessary(originalValue);
@@ -89,19 +91,45 @@ public class DefaultBeanFactory extends DefaultSingletonBeanRegistry
                 BeanInfo beanInfo = Introspector.getBeanInfo(bean.getClass());
                 PropertyDescriptor[] propertyDescriptors = beanInfo.getPropertyDescriptors();
 
-                for(PropertyDescriptor propertyDescriptor : propertyDescriptors){
-                    if (propertyDescriptor.getName().equals(propertyName)){
+                for (PropertyDescriptor propertyDescriptor : propertyDescriptors) {
+                    if (propertyDescriptor.getName().equals(propertyName)) {
                         Object convertValue = simpleTypeConverter.convertIfNecessary(resolvedValue, propertyDescriptor.getPropertyType());
                         propertyDescriptor.getWriteMethod().invoke(bean, convertValue);
                         break;
                     }
                 }
             }
-        } catch(Exception e){
+        } catch (Exception e) {
             throw new BeanCreationException("Fail to obtain BeanInfo for class " + beanDefinition.getBeanClassName());
         }
+    }
 
 
+    /**
+     * 使用BeanUtils.setProperty进行注入属性
+     *
+     * @param beanDefinition
+     * @param bean
+     */
+    private void populateBeanUseCommonBeanUtils(BeanDefinition beanDefinition, Object bean) {
+        List<PropertyValue> propertyValues = beanDefinition.getPropertyValues();
+
+        if (propertyValues == null || propertyValues.isEmpty()) {
+            return;
+        }
+
+        BeanDefinitionValueResolver beanDefinitionValueResolver = new BeanDefinitionValueResolver(this);
+        try {
+            for (PropertyValue propertyValue : propertyValues) {
+                String propertyName = propertyValue.getName();
+                Object originalValue = propertyValue.getValue();
+
+                Object resolveValue = beanDefinitionValueResolver.resolveValueIfNecessary(originalValue);
+                BeanUtils.setProperty(bean, propertyName, resolveValue);
+            }
+        } catch (Exception e) {
+            throw new BeanCreationException("Fail to obtain BeanInfo for class " + beanDefinition.getBeanClassName());
+        }
     }
 
     private Object instantiateBean(BeanDefinition beanDefinition) {

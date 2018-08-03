@@ -45,6 +45,15 @@
       <artifactId>log4j</artifactId>
       <version>1.2.17</version>
     </dependency>
+
+    <!-- https://mvnrepository.com/artifact/commons-beanutils/commons-beanutils -->
+    <!--beanutils的依赖，可以用于注入属性-->
+    <dependency>
+      <groupId>commons-beanutils</groupId>
+      <artifactId>commons-beanutils</artifactId>
+      <version>1.9.3</version>
+    </dependency>
+
   </dependencies>
 
   <build>
