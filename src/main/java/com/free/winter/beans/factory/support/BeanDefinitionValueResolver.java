@@ -1,5 +1,6 @@
 package com.free.winter.beans.factory.support;
 
+import com.free.winter.beans.factory.BeanFactory;
 import com.free.winter.beans.factory.config.RunTimeBeanReference;
 import com.free.winter.beans.factory.config.TypedStringValue;
 
@@ -9,9 +10,9 @@ import com.free.winter.beans.factory.config.TypedStringValue;
  * @project winter
  */
 public class BeanDefinitionValueResolver {
-    private final DefaultBeanFactory defaultBeanFactory;
+    private final BeanFactory defaultBeanFactory;
 
-    public BeanDefinitionValueResolver(DefaultBeanFactory defaultBeanFactory) {
+    public BeanDefinitionValueResolver(BeanFactory defaultBeanFactory) {
         this.defaultBeanFactory = defaultBeanFactory;
     }
 

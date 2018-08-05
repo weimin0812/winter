@@ -1,6 +1,7 @@
 package com.free.winter.beans.factory.support;
 
 import com.free.winter.beans.BeanDefinition;
+import com.free.winter.beans.ConstructorArgument;
 import com.free.winter.beans.PropertyValue;
 
 import java.util.ArrayList;
@@ -19,6 +20,17 @@ public class GenericBeanDefinition implements BeanDefinition {
     private boolean prototype = false;
     private String scope = SCOPE_DEFAULT;
     List<PropertyValue> propertyValues = new ArrayList<>();
+    ConstructorArgument constructorArgument = new ConstructorArgument();
+
+    @Override
+    public ConstructorArgument getConstructorArgument() {
+        return constructorArgument;
+    }
+
+    @Override
+    public boolean hasConstructorArguments() {
+        return !constructorArgument.isEmpty();
+    }
 
     @Override
     public List<PropertyValue> getPropertyValues() {
@@ -55,5 +67,10 @@ public class GenericBeanDefinition implements BeanDefinition {
     @Override
     public String getBeanClassName() {
         return beanClassName;
+    }
+
+    @Override
+    public String getId() {
+        return id;
     }
 }

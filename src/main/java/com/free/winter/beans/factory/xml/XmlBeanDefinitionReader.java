@@ -1,6 +1,7 @@
 package com.free.winter.beans.factory.xml;
 
 import com.free.winter.beans.BeanDefinition;
+import com.free.winter.beans.ConstructorArgument;
 import com.free.winter.beans.PropertyValue;
 import com.free.winter.beans.factory.BeanDefinitionRegistry;
 import com.free.winter.beans.factory.BeanDefinitionStoreException;
@@ -32,6 +33,8 @@ public class XmlBeanDefinitionReader {
     public static final String REF_ATTRIBUTE = "ref";
     public static final String VALUE_ATTRIBUTE = "value";
     public static final String NAME_ATTRIBUTE = "name";
+    private static final String CONSTRUCTOR_ARGUMENT_ELEMENT = "constructor-arg";
+    private static final String TYPE_ATTRIBUTE = "type";
 
     BeanDefinitionRegistry beanDefinitionRegistry;
 
@@ -60,7 +63,9 @@ public class XmlBeanDefinitionReader {
                 if (element.attributeValue(SCOPE_ATTRIBUTE) != null) {
                     beanDefinition.setScope(element.attributeValue(SCOPE_ATTRIBUTE));
                 }
+                parseConstructorArgumentElements(element, beanDefinition);
                 parsePropertyElement(element, beanDefinition);
+
                 this.beanDefinitionRegistry.registerBeanDefinition(id, beanDefinition);
             }
         } catch (Exception e) {
@@ -76,6 +81,44 @@ public class XmlBeanDefinitionReader {
             }
 
         }
+    }
+
+    /**
+     * 解析构造函数所有参数属性
+     *
+     * @param beanElement
+     * @param beanDefinition
+     */
+    private void parseConstructorArgumentElements(Element beanElement, BeanDefinition beanDefinition) {
+        Iterator iterator = beanElement.elementIterator(CONSTRUCTOR_ARGUMENT_ELEMENT);
+        while (iterator.hasNext()) {
+            Element element = (Element) iterator.next();
+            parseConstructorArgumentElement(element, beanDefinition);
+        }
+
+    }
+
+    /**
+     * 解析构造函数单个参数属性
+     *
+     * @param element
+     * @param beanDefinition
+     */
+    private void parseConstructorArgumentElement(Element element, BeanDefinition beanDefinition) {
+        String type = element.attributeValue(TYPE_ATTRIBUTE);
+        String name = element.attributeValue(NAME_ATTRIBUTE);
+        Object value = parsePropertyValue(element, beanDefinition, null);
+
+        ConstructorArgument.ValueHolder valueHolder = new ConstructorArgument.ValueHolder(value);
+        if (StringUtils.hasLength(type)) {
+            valueHolder.setType(type);
+        }
+
+        if (StringUtils.hasLength(name)) {
+            valueHolder.setName(name);
+        }
+
+        beanDefinition.getConstructorArgument().addArgumentValue(valueHolder);
     }
 
     private void parsePropertyElement(Element element, BeanDefinition beanDefinition) {
