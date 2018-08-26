@@ -20,6 +20,8 @@ public class ClassUtils {
      * type as value, for example: int.class -> Integer.class.
      */
     private static final Map<Class<?>, Class<?>> primitiveTypeToWrapperMap = new HashMap<Class<?>, Class<?>>(8);
+    private static final char PACKAGE_SEPARATOR = '.';
+    private static final char PATH_SEPARATOR = '/';
 
     static {
         wrapperToPrimitiveTypeMap.put(Boolean.class, boolean.class);
@@ -43,8 +45,7 @@ public class ClassUtils {
         ClassLoader cl = null;
         try {
             cl = Thread.currentThread().getContextClassLoader();
-        }
-        catch (Throwable ex) {
+        } catch (Throwable ex) {
             // Cannot access thread context ClassLoader - falling back...
         }
         if (cl == null) {
@@ -54,18 +55,19 @@ public class ClassUtils {
                 // getClassLoader() returning null indicates the bootstrap ClassLoader
                 try {
                     cl = ClassLoader.getSystemClassLoader();
-                }
-                catch (Throwable ex) {
+                } catch (Throwable ex) {
                     // Cannot access system ClassLoader - oh well, maybe the caller can live with null...
                 }
             }
         }
         return cl;
     }
+
     public static boolean isAssignableValue(Class<?> type, Object value) {
         Assert.notNull(type, "Type must not be null");
         return (value != null ? isAssignable(type, value.getClass()) : !type.isPrimitive());
     }
+
     public static boolean isAssignable(Class<?> lhsType, Class<?> rhsType) {
         Assert.notNull(lhsType, "Left-hand side type must not be null");
         Assert.notNull(rhsType, "Right-hand side type must not be null");
@@ -77,8 +79,7 @@ public class ClassUtils {
             if (resolvedPrimitive != null && lhsType.equals(resolvedPrimitive)) {
                 return true;
             }
-        }
-        else {
+        } else {
             Class<?> resolvedWrapper = primitiveTypeToWrapperMap.get(rhsType);
             if (resolvedWrapper != null && lhsType.isAssignableFrom(resolvedWrapper)) {
                 return true;
@@ -87,4 +88,13 @@ public class ClassUtils {
         return false;
     }
 
+    public static String convertClassNameToResourcePath(String className) {
+        Assert.notNull(className, "Class name must not be bull");
+        return className.replace(PACKAGE_SEPARATOR, PATH_SEPARATOR);
+    }
+
+    public static String convertResourcePathToClassName(String className) {
+        Assert.notNull(className, "Class name must not be null");
+        return className.replace(PATH_SEPARATOR, PACKAGE_SEPARATOR);
+    }
 }
